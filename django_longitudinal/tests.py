@@ -49,3 +49,78 @@ class DataPointTest(TestCase):
 		self.assertEqual(saved2.label, item2.label)
 		self.assertEqual(saved2.quantity, item2.quantity)
 		self.assertEqual(saved2.unit, item2.unit)
+
+class RestfullTest(TestCase):
+
+	def test_create_data_point_correct(self):
+		self.fail("Write test")
+
+		# when a JSON request with Method POST is sent to the DataPoint resource, with valid data
+		# it creates a new DataPoint entry
+		# with the correct values
+
+		# it returns a 201 status
+		# and returns the created entry as JSON in the body
+
+	def test_create_data_point_incorrect(self):
+		self.fail("Write test")
+
+		# when a JSON request with Method POST is sent to the DataPoint resource, with invalid data
+		# it does not create a new DataPoint entry
+		
+		# it returns a 400 status
+		
+
+	def test_update_data_point(self):
+		self.fail("Write test")
+
+		# when a JSON request with Method PUT is sent to the DataPoint resource
+		# it finds the entry with the matching id
+		# it ignores the unknown properties supplied in the JSON
+		# it updates the known properties supplied in the JSON
+
+		
+		# it returns a 200 status
+		# and returns the updated entry as JSON in the body
+
+	def test_update_data_point_unknown(self):
+		self.fail("Write test")
+
+		# when a JSON request with Method PUT is sent to the DataPoint resource
+		# with a nonexistant id
+		# it updates the properties supplied in the JSON
+		
+		# it returns a 404 status
+
+	def test_destroy_data_point(self):
+		self.fail("Write test")
+
+		# when a request with Method DELETE is sent to the DataPoint resource
+		# it deletes the entry with the matching id
+
+		# it returns a 200 status
+
+	def test_destroy_data_point_unknown(self):
+		self.fail("Write test")
+
+		# when a request with Method DELETE is sent to the DataPoint resource
+		# with a nonexistant id
+
+		# it returns a 404 status
+
+	def test_read_data_point(self):
+		self.fail("Write test")
+
+		# when a JSON request with Method GET is sent to the DataPoint resource
+		# it finds the entry with the matching id
+		
+		# it returns a 200 status
+		# and returns the found entry as JSON in the body
+
+	def test_read_data_point_unknown(self):
+		self.fail("Write test")
+
+		# when a request with Method GET is sent to the DataPoint resource
+		# with a nonexistant id
+
+		# it returns a 404 status
