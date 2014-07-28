@@ -1,25 +1,13 @@
 from django.test import TestCase
 from django.core.urlresolvers import resolve
+from django.core.urlresolvers import reverse
 from django.http import HttpRequest
+from django.test.client import Client
+import json
 
 from django_longitudinal.views import home
 from django_longitudinal.models import DataPoint
-
-# Create your tests here.
-
-class HomePageTest(TestCase):
-
-	def test_root_url_resolves_to_home_page_view(self):
-		found = resolve("/")
-		self.assertEqual(found.func, home)
-
-	def test_home_page_returns_correct_html(self):
-		request = HttpRequest()
-		response = home(request)
-
-		self.assertTrue(response.content.startswith(b"<html>"))
-		self.assertIn(b"<title>Variables</title>",response.content)
-		self.assertTrue(response.content.endswith(b"</html>"))
+from django_longitudinal.views import serializeSingle
 
 class DataPointTest(TestCase):
 
@@ -52,16 +40,39 @@ class DataPointTest(TestCase):
 
 class RestfullTest(TestCase):
 
+	def setUp(self):
+		self.client = Client()
+
 	def test_create_data_point_correct(self):
-		self.fail("Write test")
+
+		oldCount = DataPoint.objects.count()
 
 		# when a JSON request with Method POST is sent to the DataPoint resource, with valid data
+		url = reverse("datapoints")
+		data = {
+			"label": "TempTest",
+			"quantity": "Temperature",
+			"unit": "celsius"
+		}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
 		# it creates a new DataPoint entry
+		self.assertEqual(DataPoint.objects.count(),oldCount+1)
+
 		# with the correct values
+		lastDataPoint = DataPoint.objects.all().reverse()[0]
+		self.assertEqual(lastDataPoint.label, data["label"])
+		self.assertEqual(lastDataPoint.quantity, data["quantity"])
+		self.assertEqual(lastDataPoint.unit, data["unit"])
 
 		# it returns a 201 status
-		# and returns the created entry as JSON in the body
+		self.assertEqual(response.status, 201)
 
+		# and returns the created entry as JSON in the body
+		data["id"] = lastDataPoint.id
+		self.assertEqual(json.dumps(data),lastDataPoint.to_json())
+
+	"""
 	def test_create_data_point_incorrect(self):
 		self.fail("Write test")
 
@@ -124,3 +135,4 @@ class RestfullTest(TestCase):
 		# with a nonexistant id
 
 		# it returns a 404 status
+	"""
