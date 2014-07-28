@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.urlresolvers import resolve
 from django.http import HttpRequest
 
-from django_longitudal.views import home
+from django_longitudinal.views import home
 
 # Create your tests here.
 
