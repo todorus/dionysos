@@ -22,10 +22,7 @@ def datapoints(request):
 	elif request.method == POST:
 		data = json.loads(getBody(request))
 
-		entry = DataPoint()
-		entry.label = data['label']
-		entry.quantity = data['quantity']
-		entry.unit = data['unit']
+		entry = DataPoint(**data)
 		entry.save()
 
 		response.body = entry.to_json()
