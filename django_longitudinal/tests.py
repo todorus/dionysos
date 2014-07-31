@@ -70,18 +70,24 @@ class RestfullTest(TestCase):
 
 		# and returns the created entry as JSON in the body
 		data["id"] = lastDataPoint.id
-		self.assertEqual(json.dumps(data),lastDataPoint.to_json())
+		self.assertEqual(data,lastDataPoint.to_dict())
 
-	"""
 	def test_create_data_point_incorrect(self):
-		self.fail("Write test")
+		
+		oldCount = DataPoint.objects.count()
 
 		# when a JSON request with Method POST is sent to the DataPoint resource, with invalid data
+		url = reverse("datapoints")
+		data = {}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
 		# it does not create a new DataPoint entry
+		self.assertEqual(DataPoint.objects.count(),oldCount)
 		
 		# it returns a 400 status
+		self.assertEqual(response.status, 400)
 		
-
+	"""
 	def test_update_data_point(self):
 		self.fail("Write test")
 

@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django_longitudinal.models import DataPoint
 import json
 from django.core import serializers
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 GET = 'GET'
@@ -22,11 +23,16 @@ def datapoints(request):
 	elif request.method == POST:
 		data = json.loads(getBody(request))
 
-		entry = DataPoint(**data)
-		entry.save()
+		try:
+			entry = DataPoint(**data)
+			entry.full_clean()
+			entry.save()
 
-		response.body = entry.to_json()
-		response.status = 201
+			response.body = entry.to_json()
+			response.status = 201
+		except ValidationError:
+			response.status = 400
+
 	else:
 		response.status = 400
 

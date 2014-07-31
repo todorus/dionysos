@@ -8,10 +8,13 @@ class DataPoint(models.Model):
 	quantity = models.CharField(max_length=200)
 	unit = models.CharField(max_length=50)
 
-	def to_json(self):
-		return json.dumps({
+	def to_dict(self):
+		return {
 			"id":self.id,
 			"label":self.label,
 			"quantity":self.quantity,
 			"unit":self.unit
-		})
+		}
+
+	def to_json(self):
+		return json.dumps(self.to_dict())
