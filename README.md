@@ -14,6 +14,7 @@ A RESTfull JSON API which can be used to create endpoints for measurements to be
 
 * 0.1 DataPoints API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#datapoints)
 * Measurements API
+* Images
 
 Admin client
 ---
@@ -26,7 +27,8 @@ Admin webapp for sensor data collecting endpoints
 Deployment
 ---
 * Easy deployment on Google App Engine
-* Easy deployment on Google App Engine
+* Easy deployment on Raspberry PI
+* Easy deployment on Ubuntu
 
 Triggers
 ---
