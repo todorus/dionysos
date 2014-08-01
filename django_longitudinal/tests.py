@@ -1,25 +1,14 @@
 from django.test import TestCase
 from django.core.urlresolvers import resolve
+from django.core.urlresolvers import reverse
 from django.http import HttpRequest
+from django.test.client import Client
+import json
+from django.core.exceptions import ObjectDoesNotExist
 
 from django_longitudinal.views import home
 from django_longitudinal.models import DataPoint
-
-# Create your tests here.
-
-class HomePageTest(TestCase):
-
-	def test_root_url_resolves_to_home_page_view(self):
-		found = resolve("/")
-		self.assertEqual(found.func, home)
-
-	def test_home_page_returns_correct_html(self):
-		request = HttpRequest()
-		response = home(request)
-
-		self.assertTrue(response.content.startswith(b"<html>"))
-		self.assertIn(b"<title>Variables</title>",response.content)
-		self.assertTrue(response.content.endswith(b"</html>"))
+from django_longitudinal.views import serializeSingle
 
 class DataPointTest(TestCase):
 
@@ -52,75 +41,160 @@ class DataPointTest(TestCase):
 
 class RestfullTest(TestCase):
 
+	def setUp(self):
+		self.client = Client()
+
 	def test_create_data_point_correct(self):
-		self.fail("Write test")
+
+		oldCount = DataPoint.objects.count()
 
 		# when a JSON request with Method POST is sent to the DataPoint resource, with valid data
+		url = reverse("datapoints")
+		data = {
+			"label": "TempTest",
+			"quantity": "Temperature",
+			"unit": "celsius"
+		}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
 		# it creates a new DataPoint entry
+		self.assertEqual(DataPoint.objects.count(),oldCount+1)
+
 		# with the correct values
+		lastDataPoint = DataPoint.objects.all().reverse()[0]
+		self.assertEqual(lastDataPoint.label, data["label"])
+		self.assertEqual(lastDataPoint.quantity, data["quantity"])
+		self.assertEqual(lastDataPoint.unit, data["unit"])
 
 		# it returns a 201 status
+		self.assertEqual(response.status, 201)
+
 		# and returns the created entry as JSON in the body
+		self.assertEqual(json.loads(response.body),lastDataPoint.to_dict())
 
 	def test_create_data_point_incorrect(self):
-		self.fail("Write test")
+		
+		oldCount = DataPoint.objects.count()
 
 		# when a JSON request with Method POST is sent to the DataPoint resource, with invalid data
+		url = reverse("datapoints")
+		data = {}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
 		# it does not create a new DataPoint entry
+		self.assertEqual(DataPoint.objects.count(),oldCount)
 		
 		# it returns a 400 status
+		self.assertEqual(response.status, 400)
 		
-
 	def test_update_data_point(self):
-		self.fail("Write test")
+		item = DataPoint()
+		item.label = "Inside temperature"
+		item.quantity = "temperature"
+		item.unit = "°C"
+		item.save()
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
-		# it finds the entry with the matching id
-		# it ignores the unknown properties supplied in the JSON
-		# it updates the known properties supplied in the JSON
+		url = reverse("datapoint", kwargs={"id":item.id})
+		data = {
+			"label":"Outside wind",
+			"quantity": "Velocity",
+			"unit": "m/s",
+		}
+		response = self.client.put(url, json.dumps(data),content_type="application/json")
 
+		# it finds the entry with the matching id
+		jsonResponse = json.loads(response.body)
+		self.assertEqual(jsonResponse["id"],item.id)
+		
+		# it updates the known properties supplied in the JSON
+		data["id"] = item.id
+		testItem = DataPoint.objects.get(pk=item.id)
+		self.assertEqual(data, testItem.to_dict())
 		
 		# it returns a 200 status
+		self.assertEqual(response.status, 200)
+
 		# and returns the updated entry as JSON in the body
+		self.assertEqual(data, jsonResponse)
+
+	
 
 	def test_update_data_point_unknown(self):
-		self.fail("Write test")
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
 		# with a nonexistant id
-		# it updates the properties supplied in the JSON
+		url = reverse("datapoint", kwargs={"id":0})
+		data = {
+			"label":"Outside wind",
+			"quantity": "Velocity",
+			"unit": "m/s",
+		}
+		response = self.client.put(url, json.dumps(data),content_type="application/json")
 		
 		# it returns a 404 status
+		self.assertEqual(response.status, 404)
 
+	
+	
 	def test_destroy_data_point(self):
-		self.fail("Write test")
+		item = DataPoint()
+		item.label = "Inside temperature"
+		item.quantity = "temperature"
+		item.unit = "°C"
+		item.save()
+
+		oldCount = DataPoint.objects.count()
 
 		# when a request with Method DELETE is sent to the DataPoint resource
+		url = reverse("datapoint", kwargs={"id":item.id})
+		response = self.client.delete(url)
+
 		# it deletes the entry with the matching id
+		self.assertEqual(oldCount-1,DataPoint.objects.count())
+		self.assertRaises(ObjectDoesNotExist, lambda: DataPoint.objects.get(pk=item.id))
 
 		# it returns a 200 status
+		self.assertEqual(response.status, 200)
 
 	def test_destroy_data_point_unknown(self):
-		self.fail("Write test")
 
 		# when a request with Method DELETE is sent to the DataPoint resource
 		# with a nonexistant id
+		url = reverse("datapoint", kwargs={"id":0})
+		response = self.client.delete(url)
 
 		# it returns a 404 status
+		self.assertEqual(response.status, 404)
+
 
 	def test_read_data_point(self):
-		self.fail("Write test")
+
+		item = DataPoint()
+		item.label = "Inside temperature"
+		item.quantity = "temperature"
+		item.unit = "°C"
+		item.save()
 
 		# when a JSON request with Method GET is sent to the DataPoint resource
 		# it finds the entry with the matching id
+		url = reverse("datapoint", kwargs={"id":item.id})
+		response = self.client.get(url,content_type="application/json")
 		
 		# it returns a 200 status
+		self.assertEqual(response.status, 200)
+
 		# and returns the found entry as JSON in the body
+		self.assertEqual(json.loads(response.body),item.to_dict())
+
 
 	def test_read_data_point_unknown(self):
-		self.fail("Write test")
 
 		# when a request with Method GET is sent to the DataPoint resource
 		# with a nonexistant id
+		url = reverse("datapoint", kwargs={"id":0})
+		response = self.client.get(url,content_type="application/json")
 
 		# it returns a 404 status
+		self.assertEqual(response.status, 404)
+	
