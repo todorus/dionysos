@@ -39,15 +39,11 @@ def datapoints(request):
 def datapoint(request, id):
 	response = HttpResponse()
 	response.status = 400
-	# entry = DataPoint.objects.get(pk=id)
-	# try:
-	# 	pass
-	# except Exception, e:
-	# 	raise e
 
 	try:
 		if request.method == GET:
-			response.body = "get"
+			response.body = DataPoint.objects.get(pk=id).to_json()
+			response.status = 200
 		elif request.method == PUT:
 			data = json.loads(getBody(request))
 			DataPoint.objects.filter(pk=id).update(**data)

@@ -167,22 +167,34 @@ class RestfullTest(TestCase):
 		# it returns a 404 status
 		self.assertEqual(response.status, 404)
 
-	"""
 
 	def test_read_data_point(self):
-		self.fail("Write test")
+
+		item = DataPoint()
+		item.label = "Inside temperature"
+		item.quantity = "temperature"
+		item.unit = "°C"
+		item.save()
 
 		# when a JSON request with Method GET is sent to the DataPoint resource
 		# it finds the entry with the matching id
+		url = reverse("datapoint", kwargs={"id":item.id})
+		response = self.client.get(url,content_type="application/json")
 		
 		# it returns a 200 status
+		self.assertEqual(response.status, 200)
+
 		# and returns the found entry as JSON in the body
+		self.assertEqual(json.loads(response.body),item.to_dict())
+
 
 	def test_read_data_point_unknown(self):
-		self.fail("Write test")
 
 		# when a request with Method GET is sent to the DataPoint resource
 		# with a nonexistant id
+		url = reverse("datapoint", kwargs={"id":0})
+		response = self.client.get(url,content_type="application/json")
 
 		# it returns a 404 status
-	"""
+		self.assertEqual(response.status, 404)
+	
