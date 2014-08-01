@@ -23,7 +23,7 @@ Admin webapp for sensor data collecting endpoints
 * DataPoints admin
 * Measurements admin
 * Arduino code generator
-* Graphs
+* Reporting
 
 Deployment
 ---
