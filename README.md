@@ -6,7 +6,7 @@ A server for managing sensors and actuators in a aquaponics setup. Written in Py
 Roadmap
 ========
 
-_Planned releases and their featureset. When a version number is in front of the feature, it was implemented in that version. Documentation will probably lag behind_
+_Planned releases and their featureset (subject to change). When a version number is in front of the feature, it was implemented in that version. Documentation will probably lag behind_
 
 API
 ---
