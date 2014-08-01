@@ -4,11 +4,12 @@ from django_longitudinal.models import DataPoint
 import json
 from django.core import serializers
 from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 GET = 'GET'
 POST = 'POST'
-UPDATE = 'UPDATE'
+PUT = 'PUT'
 DELETE = 'DELETE'
 
 def home(request):
@@ -33,20 +34,26 @@ def datapoints(request):
 		except ValidationError:
 			response.status = 400
 
-	else:
-		response.status = 400
-
 	return response
 
 def datapoint(request, id):
+	response = HttpResponse()
+	response.status = 400
+
 	if request.method == GET:
-		return None
-	elif request.method == UPDATE:
-		return None
+		response.body = "get"
+	elif request.method == PUT:
+		try:
+			data = json.loads(getBody(request))
+			DataPoint.objects.filter(pk=id).update(**data)
+			response.body = DataPoint.objects.get(pk=id).to_json()
+			response.status = 200
+		except ObjectDoesNotExist:
+			response.status = 404
 	elif request.method == DELETE:
-		return None
-	else:
-		return None
+		response.body = "delete"
+
+	return response
 
 def getBody(request):
 	if isinstance(request.body, bytes):

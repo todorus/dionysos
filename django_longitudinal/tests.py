@@ -86,7 +86,6 @@ class RestfullTest(TestCase):
 		# it returns a 400 status
 		self.assertEqual(response.status, 400)
 		
-	"""
 	def test_update_data_point(self):
 		item = DataPoint()
 		item.label = "Inside temperature"
@@ -96,7 +95,7 @@ class RestfullTest(TestCase):
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
 		url = reverse("datapoint", kwargs={"id":item.id})
-		data{
+		data = {
 			"label":"Outside wind",
 			"quantity": "Velocity",
 			"unit": "m/s",
@@ -104,23 +103,38 @@ class RestfullTest(TestCase):
 		response = self.client.put(url, json.dumps(data),content_type="application/json")
 
 		# it finds the entry with the matching id
-		assertEqual(response.body)
-		# it ignores the unknown properties supplied in the JSON
+		jsonResponse = json.loads(response.body)
+		self.assertEqual(jsonResponse["id"],item.id)
+		
 		# it updates the known properties supplied in the JSON
-
+		data["id"] = item.id
+		testItem = DataPoint.objects.get(pk=item.id)
+		self.assertEqual(data, testItem.to_dict())
 		
 		# it returns a 200 status
+		self.assertEqual(response.status, 200)
+
 		# and returns the updated entry as JSON in the body
+		self.assertEqual(data, jsonResponse)
+
+	
 
 	def test_update_data_point_unknown(self):
-		self.fail("Write test")
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
 		# with a nonexistant id
-		# it updates the properties supplied in the JSON
+		url = reverse("datapoint", kwargs={"id":0})
+		data = {
+			"label":"Outside wind",
+			"quantity": "Velocity",
+			"unit": "m/s",
+		}
+		response = self.client.put(url, json.dumps(data),content_type="application/json")
 		
 		# it returns a 404 status
+		self.assertEqual(response.status, 404)
 
+	"""
 	
 	def test_destroy_data_point(self):
 		self.fail("Write test")
