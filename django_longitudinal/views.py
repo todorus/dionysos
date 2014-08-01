@@ -39,19 +39,25 @@ def datapoints(request):
 def datapoint(request, id):
 	response = HttpResponse()
 	response.status = 400
+	# entry = DataPoint.objects.get(pk=id)
+	# try:
+	# 	pass
+	# except Exception, e:
+	# 	raise e
 
-	if request.method == GET:
-		response.body = "get"
-	elif request.method == PUT:
-		try:
+	try:
+		if request.method == GET:
+			response.body = "get"
+		elif request.method == PUT:
 			data = json.loads(getBody(request))
 			DataPoint.objects.filter(pk=id).update(**data)
 			response.body = DataPoint.objects.get(pk=id).to_json()
 			response.status = 200
-		except ObjectDoesNotExist:
+		elif request.method == DELETE:
+			DataPoint.objects.get(pk=id).delete()
+			response.status = 200
+	except ObjectDoesNotExist:
 			response.status = 404
-	elif request.method == DELETE:
-		response.body = "delete"
 
 	return response
 

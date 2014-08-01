@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpRequest
 from django.test.client import Client
 import json
+from django.core.exceptions import ObjectDoesNotExist
 
 from django_longitudinal.views import home
 from django_longitudinal.models import DataPoint
@@ -134,23 +135,39 @@ class RestfullTest(TestCase):
 		# it returns a 404 status
 		self.assertEqual(response.status, 404)
 
-	"""
+	
 	
 	def test_destroy_data_point(self):
-		self.fail("Write test")
+		item = DataPoint()
+		item.label = "Inside temperature"
+		item.quantity = "temperature"
+		item.unit = "°C"
+		item.save()
+
+		oldCount = DataPoint.objects.count()
 
 		# when a request with Method DELETE is sent to the DataPoint resource
+		url = reverse("datapoint", kwargs={"id":item.id})
+		response = self.client.delete(url)
+
 		# it deletes the entry with the matching id
+		self.assertEqual(oldCount-1,DataPoint.objects.count())
+		self.assertRaises(ObjectDoesNotExist, lambda: DataPoint.objects.get(pk=item.id))
 
 		# it returns a 200 status
+		self.assertEqual(response.status, 200)
 
 	def test_destroy_data_point_unknown(self):
-		self.fail("Write test")
 
 		# when a request with Method DELETE is sent to the DataPoint resource
 		# with a nonexistant id
+		url = reverse("datapoint", kwargs={"id":0})
+		response = self.client.delete(url)
 
 		# it returns a 404 status
+		self.assertEqual(response.status, 404)
+
+	"""
 
 	def test_read_data_point(self):
 		self.fail("Write test")
