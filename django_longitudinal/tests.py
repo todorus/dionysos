@@ -69,8 +69,7 @@ class RestfullTest(TestCase):
 		self.assertEqual(response.status, 201)
 
 		# and returns the created entry as JSON in the body
-		data["id"] = lastDataPoint.id
-		self.assertEqual(data,lastDataPoint.to_dict())
+		self.assertEqual(json.loads(response.body),lastDataPoint.to_dict())
 
 	def test_create_data_point_incorrect(self):
 		
@@ -89,10 +88,23 @@ class RestfullTest(TestCase):
 		
 	"""
 	def test_update_data_point(self):
-		self.fail("Write test")
+		item = DataPoint()
+		item.label = "Inside temperature"
+		item.quantity = "temperature"
+		item.unit = "°C"
+		item.save()
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
+		url = reverse("datapoint", kwargs={"id":item.id})
+		data{
+			"label":"Outside wind",
+			"quantity": "Velocity",
+			"unit": "m/s",
+		}
+		response = self.client.put(url, json.dumps(data),content_type="application/json")
+
 		# it finds the entry with the matching id
+		assertEqual(response.body)
 		# it ignores the unknown properties supplied in the JSON
 		# it updates the known properties supplied in the JSON
 
@@ -109,6 +121,7 @@ class RestfullTest(TestCase):
 		
 		# it returns a 404 status
 
+	
 	def test_destroy_data_point(self):
 		self.fail("Write test")
 
