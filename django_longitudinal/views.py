@@ -5,6 +5,7 @@ import json
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 
 # Create your views here.
 GET = 'GET'
@@ -32,6 +33,8 @@ def datapoints(request):
 			response.body = entry.to_json()
 			response.status = 201
 		except ValidationError:
+			response.status = 400
+		except IntegrityError:
 			response.status = 400
 
 	return response

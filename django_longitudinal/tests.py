@@ -17,12 +17,14 @@ class DataPointTest(TestCase):
 		item1.label = "Inside temperature"
 		item1.quantity = "temperature"
 		item1.unit = "°C"
+		item1.datatype = DataPoint.TYPE_FLOAT
 		item1.save()
 
 		item2 = DataPoint()
 		item2.label = "Outside light"
 		item2.quantity = "Luminance"
 		item2.unit = "cd/m^2"
+		item2.datatype = DataPoint.TYPE_FLOAT
 		item2.save()
 
 		saved_items = DataPoint.objects.all()
@@ -53,7 +55,8 @@ class RestfullTest(TestCase):
 		data = {
 			"label": "TempTest",
 			"quantity": "Temperature",
-			"unit": "celsius"
+			"unit": "celsius",
+			"datatype":DataPoint.TYPE_FLOAT,
 		}
 		response = self.client.post(url, json.dumps(data),content_type="application/json")
 
@@ -65,6 +68,7 @@ class RestfullTest(TestCase):
 		self.assertEqual(lastDataPoint.label, data["label"])
 		self.assertEqual(lastDataPoint.quantity, data["quantity"])
 		self.assertEqual(lastDataPoint.unit, data["unit"])
+		self.assertEqual(lastDataPoint.datatype, data["datatype"])
 
 		# it returns a 201 status
 		self.assertEqual(response.status, 201)
@@ -92,6 +96,7 @@ class RestfullTest(TestCase):
 		item.label = "Inside temperature"
 		item.quantity = "temperature"
 		item.unit = "°C"
+		item.datatype = DataPoint.TYPE_FLOAT
 		item.save()
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
@@ -100,6 +105,7 @@ class RestfullTest(TestCase):
 			"label":"Outside wind",
 			"quantity": "Velocity",
 			"unit": "m/s",
+			"datatype": DataPoint.TYPE_FLOAT,
 		}
 		response = self.client.put(url, json.dumps(data),content_type="application/json")
 
@@ -129,6 +135,7 @@ class RestfullTest(TestCase):
 			"label":"Outside wind",
 			"quantity": "Velocity",
 			"unit": "m/s",
+			"datatype": DataPoint.TYPE_FLOAT,
 		}
 		response = self.client.put(url, json.dumps(data),content_type="application/json")
 		
@@ -142,6 +149,7 @@ class RestfullTest(TestCase):
 		item.label = "Inside temperature"
 		item.quantity = "temperature"
 		item.unit = "°C"
+		item.datatype = DataPoint.TYPE_FLOAT
 		item.save()
 
 		oldCount = DataPoint.objects.count()
@@ -174,6 +182,7 @@ class RestfullTest(TestCase):
 		item.label = "Inside temperature"
 		item.quantity = "temperature"
 		item.unit = "°C"
+		item.datatype = DataPoint.TYPE_FLOAT
 		item.save()
 
 		# when a JSON request with Method GET is sent to the DataPoint resource
