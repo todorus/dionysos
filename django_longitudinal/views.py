@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django_longitudinal.models import DataPoint
 from django_longitudinal.models import Measurement
-from django.utils import timezone
 import json
 from django.core import serializers
 from django.core.exceptions import ValidationError
@@ -77,22 +76,7 @@ def measurements(request, datapoint_id):
 		datapoint = DataPoint.objects.get(pk=datapoint_id)
 		entry = Measurement()
 		entry.datapoint = datapoint
-
-		if(datapoint.datatype == DataPoint.TYPE_STRING):
-			entry.valueString = data["value"]
-		elif(datapoint.datatype == DataPoint.TYPE_INTEGER):
-			entry.valueInt = data["value"]
-		elif(datapoint.datatype == DataPoint.TYPE_FLOAT):
-			entry.valueFloat = data["value"]
-		elif(datapoint.datatype == DataPoint.TYPE_IMAGE):
-			debug = 1
-
-		if("time" in data):
-			time = data["time"]
-		else:
-			time = timezone.now()
-		entry.time = time
-
+		entry.setData(**data)
 		entry.full_clean()
 		entry.save()
 
@@ -109,7 +93,25 @@ def measurements(request, datapoint_id):
 
 
 def measurement(request, datapoint_id, measurement_id):
-	return None
+	response = HttpResponse()
+	response.status = 400
+
+	try:
+		if request.method == GET:
+			response.body = Measurement.objects.get(pk=measurement_id).to_json()
+			response.status = 200
+		elif request.method == PUT:
+			data = json.loads(getBody(request))
+			Measurement.objects.get(pk=measurement_id).setData(**data)
+			response.body = Measurement.objects.get(pk=measurement_id).to_json()
+			response.status = 200
+		elif request.method == DELETE:
+			Measurement.objects.get(pk=measurement_id).delete()
+			response.status = 200
+	except ObjectDoesNotExist:
+			response.status = 404
+
+	return response
 
 def getBody(request):
 	if isinstance(request.body, bytes):

@@ -268,11 +268,45 @@ class MeasurementTest(TestCase):
 		# it returns a 400 status
 		self.assertEqual(response.status, 400)
 
-"""		
 	def test_update(self):
-		self.fail("Write test")
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
 
-	
+		oldTime = timezone.now()
+		measurement = Measurement()
+		measurement.datapoint = datapoint
+		measurement.valueFloat = 20
+		measurement.time = oldTime
+		measurement.save()
+
+		# when a JSON request with Method PUT is sent to the Measurement resource
+		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":measurement.id})
+		data = {
+			"value":10,
+			"time": timezone.now().isoformat(),
+		}
+		response = self.client.put(url, json.dumps(data),content_type="application/json")
+
+		# it finds the entry with the matching id
+		jsonResponse = json.loads(response.body)
+		self.assertEqual(jsonResponse["id"],measurement.id)
+		
+		# it updates the known properties supplied in the JSON
+		data["id"] = measurement.id
+		testItem = Measurement.objects.get(pk=measurement.id)
+		self.assertEqual(data, testItem.to_dict())
+		
+		# it returns a 200 status
+		self.assertEqual(response.status, 200)
+
+		# and returns the updated entry as JSON in the body
+		self.assertEqual(data, jsonResponse)
+
+"""
 
 	def test_update_unknown(self):
 		self.fail("Write test")
