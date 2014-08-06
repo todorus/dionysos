@@ -2,51 +2,22 @@ from django.test import TestCase
 from django.core.urlresolvers import resolve
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
+from django.utils import timezone
 from django.test.client import Client
 import json
 from django.core.exceptions import ObjectDoesNotExist
 
 from django_longitudinal.views import home
 from django_longitudinal.models import DataPoint
+from django_longitudinal.models import Measurement
 from django_longitudinal.views import serializeSingle
 
 class DataPointTest(TestCase):
 
-	def test_saving_and_retrieving_datapoints(self):
-		item1 = DataPoint()
-		item1.label = "Inside temperature"
-		item1.quantity = "temperature"
-		item1.unit = "°C"
-		item1.datatype = DataPoint.TYPE_FLOAT
-		item1.save()
-
-		item2 = DataPoint()
-		item2.label = "Outside light"
-		item2.quantity = "Luminance"
-		item2.unit = "cd/m^2"
-		item2.datatype = DataPoint.TYPE_FLOAT
-		item2.save()
-
-		saved_items = DataPoint.objects.all()
-		self.assertEqual(saved_items.count(),2)
-
-		saved1 = saved_items[0]
-		saved2 = saved_items[1]
-
-		self.assertEqual(saved1.label, item1.label)
-		self.assertEqual(saved1.quantity, item1.quantity)
-		self.assertEqual(saved1.unit, item1.unit)
-
-		self.assertEqual(saved2.label, item2.label)
-		self.assertEqual(saved2.quantity, item2.quantity)
-		self.assertEqual(saved2.unit, item2.unit)
-
-class RestfullTest(TestCase):
-
 	def setUp(self):
 		self.client = Client()
 
-	def test_create_data_point_correct(self):
+	def test_create_correct(self):
 
 		oldCount = DataPoint.objects.count()
 
@@ -76,7 +47,7 @@ class RestfullTest(TestCase):
 		# and returns the created entry as JSON in the body
 		self.assertEqual(json.loads(response.body),lastDataPoint.to_dict())
 
-	def test_create_data_point_incorrect(self):
+	def test_create_incorrect(self):
 		
 		oldCount = DataPoint.objects.count()
 
@@ -91,7 +62,7 @@ class RestfullTest(TestCase):
 		# it returns a 400 status
 		self.assertEqual(response.status, 400)
 		
-	def test_update_data_point(self):
+	def test_update(self):
 		item = DataPoint()
 		item.label = "Inside temperature"
 		item.quantity = "temperature"
@@ -126,7 +97,7 @@ class RestfullTest(TestCase):
 
 	
 
-	def test_update_data_point_unknown(self):
+	def test_update_unknown(self):
 
 		# when a JSON request with Method PUT is sent to the DataPoint resource
 		# with a nonexistant id
@@ -144,7 +115,7 @@ class RestfullTest(TestCase):
 
 	
 	
-	def test_destroy_data_point(self):
+	def test_destroy(self):
 		item = DataPoint()
 		item.label = "Inside temperature"
 		item.quantity = "temperature"
@@ -165,7 +136,7 @@ class RestfullTest(TestCase):
 		# it returns a 200 status
 		self.assertEqual(response.status, 200)
 
-	def test_destroy_data_point_unknown(self):
+	def test_destroy_unknown(self):
 
 		# when a request with Method DELETE is sent to the DataPoint resource
 		# with a nonexistant id
@@ -176,7 +147,7 @@ class RestfullTest(TestCase):
 		self.assertEqual(response.status, 404)
 
 
-	def test_read_data_point(self):
+	def test_read(self):
 
 		item = DataPoint()
 		item.label = "Inside temperature"
@@ -197,7 +168,7 @@ class RestfullTest(TestCase):
 		self.assertEqual(json.loads(response.body),item.to_dict())
 
 
-	def test_read_data_point_unknown(self):
+	def test_read_unknown(self):
 
 		# when a request with Method GET is sent to the DataPoint resource
 		# with a nonexistant id
@@ -206,4 +177,119 @@ class RestfullTest(TestCase):
 
 		# it returns a 404 status
 		self.assertEqual(response.status, 404)
+
+
+class MeasurementTest(TestCase):
+
+	def setUp(self):
+		self.client = Client()
+
+	def test_create_correct(self):
+
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		oldCount = Measurement.objects.count()
+
+		# when a JSON request with Method POST is sent to a Measurements endpoint, with valid data
+		url = reverse("measurements", kwargs={"datapoint_id":datapoint.id})
+		data = {
+			"value": 1.0,
+			"time": timezone.now().isoformat(),
+		}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
+		# it creates a new Measurement entry
+		self.assertEqual(Measurement.objects.count(),oldCount+1)
+
+		# with the correct values
+		lastMeasurement = Measurement.objects.all().reverse()[0]
+		self.assertEqual(lastMeasurement.valueFloat, data["value"])
+		self.assertEqual(lastMeasurement.time.isoformat(), data["time"])
+
+		# it returns a 201 status
+		self.assertEqual(response.status, 201)
+
+		# and returns the created entry as JSON in the body
+		self.assertEqual(json.loads(response.body),lastMeasurement.to_dict())
+
+	def test_create_correct_notime(self):
+
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		oldCount = Measurement.objects.count()
+
+		# when a JSON request with Method POST is sent to a Measurements endpoint, with valid data
+		url = reverse("measurements", kwargs={"datapoint_id":datapoint.id})
+		data = {
+			"value": 1.0,
+		}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
+		# it creates a new Measurement entry
+		self.assertEqual(Measurement.objects.count(),oldCount+1)
+
+		# with the correct values
+		lastMeasurement = Measurement.objects.all().reverse()[0]
+		self.assertEqual(lastMeasurement.valueFloat, data["value"])
+
+		# it returns a 201 status
+		self.assertEqual(response.status, 201)
+
+	def test_create_incorrect(self):
+
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		oldCount = Measurement.objects.count()
+
+		# when a JSON request with Method POST is sent to a Measurements endpoint, with valid data
+		url = reverse("measurements", kwargs={"datapoint_id":datapoint.id})
+		data = {
+		}
+		response = self.client.post(url, json.dumps(data),content_type="application/json")
+
+		# it DOES NOT create a new Measurement entry
+		self.assertEqual(Measurement.objects.count(),oldCount)
+
+		# it returns a 400 status
+		self.assertEqual(response.status, 400)
+
+"""		
+	def test_update(self):
+		self.fail("Write test")
+
 	
+
+	def test_update_unknown(self):
+		self.fail("Write test")
+
+	
+	
+	def test_destroy(self):
+		self.fail("Write test")
+
+	def test_destroy_unknown(self):
+		self.fail("Write test")
+
+
+	def test_read(self):
+		self.fail("Write test")
+
+
+	def test_read_unknown(self):
+		self.fail("Write test")
+"""	

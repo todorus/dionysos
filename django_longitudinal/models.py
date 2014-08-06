@@ -31,3 +31,29 @@ class DataPoint(models.Model):
 
 	def to_json(self):
 		return json.dumps(self.to_dict())
+
+class Measurement(models.Model):
+	datapoint = models.ForeignKey(DataPoint)
+	valueInt = models.IntegerField(null=True, blank=True)
+	valueFloat = models.FloatField(null=True, blank=True)
+	valueString = models.CharField(max_length=200,null=True, blank=True)
+	time = models.DateTimeField()
+
+	def to_dict(self):
+		if(self.datapoint.datatype == DataPoint.TYPE_STRING):
+			value = self.valueString
+		elif(self.datapoint.datatype == DataPoint.TYPE_INTEGER):
+			value = self.valueInt
+		elif(self.datapoint.datatype == DataPoint.TYPE_FLOAT):
+			value = self.valueFloat
+		elif(datapoint.datatype == DataPoint.TYPE_IMAGE):
+			debug = 1
+
+		return {
+			"value":value,
+			"time":str(self.time)
+		}
+
+	def to_json(self):
+		return json.dumps(self.to_dict())
+
