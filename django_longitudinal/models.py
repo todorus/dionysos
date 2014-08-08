@@ -1,6 +1,7 @@
 from django.db import models
 import json
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -68,7 +69,7 @@ class Measurement(models.Model):
 		return {
 			"id": self.id,
 			"value":value,
-			"time":str(self.time)
+			"time": self.time.isoformat()
 		}
 
 	def to_json(self):

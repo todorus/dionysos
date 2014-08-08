@@ -102,7 +102,9 @@ def measurement(request, datapoint_id, measurement_id):
 			response.status = 200
 		elif request.method == PUT:
 			data = json.loads(getBody(request))
-			Measurement.objects.get(pk=measurement_id).setData(**data)
+			measurement = Measurement.objects.get(pk=measurement_id)
+			measurement.setData(**data)
+			measurement.save()
 			response.body = Measurement.objects.get(pk=measurement_id).to_json()
 			response.status = 200
 		elif request.method == DELETE:
