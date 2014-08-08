@@ -24,7 +24,12 @@ def datapoints(request):
 	response.status = 400
 
 	if request.method == GET:
-		debug = 1
+		entries = DataPoint.objects.all()
+		dicts = []
+		for entry in entries:
+			dicts.append(entry.to_dict())
+		response.body = json.dumps(dicts)
+		response.status = 200
 	elif request.method == POST:
 		data = json.loads(getBody(request))
 
