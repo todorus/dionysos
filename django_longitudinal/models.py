@@ -1,5 +1,7 @@
 from django.db import models
 import json
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -31,3 +33,51 @@ class DataPoint(models.Model):
 
 	def to_json(self):
 		return json.dumps(self.to_dict())
+
+class Measurement(models.Model):
+	datapoint = models.ForeignKey(DataPoint)
+	valueInt = models.IntegerField(null=True, blank=True)
+	valueFloat = models.FloatField(null=True, blank=True)
+	valueString = models.CharField(max_length=200,null=True, blank=True)
+	time = models.DateTimeField()
+
+	def setData(self,value=None,time=None):
+		if(self.datapoint.datatype == DataPoint.TYPE_STRING):
+			self.valueString = value
+		elif(self.datapoint.datatype == DataPoint.TYPE_INTEGER):
+			self.valueInt = value
+		elif(self.datapoint.datatype == DataPoint.TYPE_FLOAT):
+			self.valueFloat = value
+		elif(self.datapoint.datatype == DataPoint.TYPE_IMAGE):
+			debug = 1
+
+		if(time != None):
+			self.time = time
+		else:
+			self.time = timezone.now()
+
+	def to_dict(self):
+		if(self.datapoint.datatype == DataPoint.TYPE_STRING):
+			value = self.valueString
+		elif(self.datapoint.datatype == DataPoint.TYPE_INTEGER):
+			value = self.valueInt
+		elif(self.datapoint.datatype == DataPoint.TYPE_FLOAT):
+			value = self.valueFloat
+		elif(datapoint.datatype == DataPoint.TYPE_IMAGE):
+			debug = 1
+
+		return {
+			"id": self.id,
+			"value":value,
+			"time": self.time.isoformat()
+		}
+
+	def to_json(self):
+		return json.dumps(self.to_dict())
+
+	def clean(self):
+		super(Measurement, self).clean()
+
+		if((self.datapoint.datatype == DataPoint.TYPE_STRING and self.valueString == None) or (self.datapoint.datatype == DataPoint.TYPE_INTEGER and self.valueInt == None) or (self.datapoint.datatype == DataPoint.TYPE_FLOAT and self.valueFloat == None)):
+			raise ValidationError('Measurement must have a value')
+

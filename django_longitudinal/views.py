@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django_longitudinal.models import DataPoint
+from django_longitudinal.models import Measurement
 import json
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
+
+import pdb
 
 # Create your views here.
 GET = 'GET'
@@ -54,6 +57,58 @@ def datapoint(request, id):
 			response.status = 200
 		elif request.method == DELETE:
 			DataPoint.objects.get(pk=id).delete()
+			response.status = 200
+	except ObjectDoesNotExist:
+			response.status = 404
+
+	return response
+
+def measurements(request, datapoint_id):
+	response = HttpResponse()
+	response.status = 400
+
+	if request.method == GET:
+		debug = 1
+	elif request.method == POST:
+		data = json.loads(getBody(request))
+
+	try:
+		datapoint = DataPoint.objects.get(pk=datapoint_id)
+		entry = Measurement()
+		entry.datapoint = datapoint
+		entry.setData(**data)
+		entry.full_clean()
+		entry.save()
+
+		response.body = entry.to_json()
+		response.status = 201
+	except ValidationError:
+		response.status = 400
+	except IntegrityError:
+		response.status = 400
+	except KeyError:
+		response.status = 400
+
+	return response
+
+
+def measurement(request, datapoint_id, measurement_id):
+	response = HttpResponse()
+	response.status = 400
+
+	try:
+		if request.method == GET:
+			response.body = Measurement.objects.get(pk=measurement_id).to_json()
+			response.status = 200
+		elif request.method == PUT:
+			data = json.loads(getBody(request))
+			measurement = Measurement.objects.get(pk=measurement_id)
+			measurement.setData(**data)
+			measurement.save()
+			response.body = Measurement.objects.get(pk=measurement_id).to_json()
+			response.status = 200
+		elif request.method == DELETE:
+			Measurement.objects.get(pk=measurement_id).delete()
 			response.status = 200
 	except ObjectDoesNotExist:
 			response.status = 404
