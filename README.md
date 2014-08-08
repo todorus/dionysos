@@ -12,8 +12,8 @@ API
 ---
 A RESTfull JSON API which can be used to create endpoints for measurements to be sent to by other devices (Arduino, for example)
 
-* 0.1 DataPoints API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#datapoints)
-* Measurements API
+* 0.1.1 DataPoints API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#datapoints)
+* 0.2   Measurements API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#measurements)
 * Images
 
 Admin client
