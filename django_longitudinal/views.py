@@ -73,26 +73,38 @@ def measurements(request, datapoint_id):
 	response.status = 400
 
 	if request.method == GET:
-		debug = 1
+		try:
+			datapoint = DataPoint.objects.get(pk=datapoint_id)
+			entries = datapoint.measurement_set.all()
+			dicts = []
+			for entry in entries:
+				dicts.append(entry.to_dict())
+			response.body = json.dumps(dicts)
+			response.status = 200
+				
+		except ObjectDoesNotExist:
+			response.status = 404
 	elif request.method == POST:
 		data = json.loads(getBody(request))
 
-	try:
-		datapoint = DataPoint.objects.get(pk=datapoint_id)
-		entry = Measurement()
-		entry.datapoint = datapoint
-		entry.setData(**data)
-		entry.full_clean()
-		entry.save()
+		try:
+			datapoint = DataPoint.objects.get(pk=datapoint_id)
+			entry = Measurement()
+			entry.datapoint = datapoint
+			entry.setData(**data)
+			entry.full_clean()
+			entry.save()
 
-		response.body = entry.to_json()
-		response.status = 201
-	except ValidationError:
-		response.status = 400
-	except IntegrityError:
-		response.status = 400
-	except KeyError:
-		response.status = 400
+			response.body = entry.to_json()
+			response.status = 201
+		except ValidationError:
+			response.status = 400
+		except IntegrityError:
+			response.status = 400
+		except KeyError:
+			response.status = 400
+		except ObjectDoesNotExist:
+			response.status = 404
 
 	return response
 

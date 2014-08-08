@@ -454,12 +454,32 @@ class MeasurementTest(TestCase):
 		# it returns a 200 status
 		self.assertEqual(response.status, 404)
 
-"""
 	def test_index(self):
 
-		self.fail("Write test")
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		measurement1 = Measurement()
+		measurement1.datapoint = datapoint
+		measurement1.valueFloat = 20
+		measurement1.time = timezone.now()
+		measurement1.save()
+
+		measurement2 = Measurement()
+		measurement2.datapoint = datapoint
+		measurement2.valueFloat = 20.3
+		measurement2.time = timezone.now()
+		measurement2.save()
 
 		# when a request with Method GET is sent to the Measurements resource
+		url = reverse("measurements", kwargs={"datapoint_id":datapoint.id})
+		response = self.client.get(url,content_type="application/json")
 		# it returns all Measurements for that DataPoint
+		measurements = [measurement1.to_dict(), measurement2.to_dict()]
+		self.assertEqual(json.loads(response.body), measurements)
 		# it returns a 200 status
-"""		
+		self.assertEqual(response.status, 200)
