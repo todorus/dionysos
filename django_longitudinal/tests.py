@@ -306,20 +306,72 @@ class MeasurementTest(TestCase):
 		# and returns the updated entry as JSON in the body
 		self.assertEqual(data, jsonResponse)
 
-"""
-
 	def test_update_unknown(self):
-		self.fail("Write test")
+		# when a JSON request with Method PUT is sent to the Measurement resource
+		# with a nonexistant id
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
 
-	
-	
+		# when a JSON request with Method PUT is sent to the Measurement resource
+		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":0})
+		data = {
+			"value":10,
+			"time": timezone.now().isoformat(),
+		}
+		response = self.client.put(url, json.dumps(data),content_type="application/json")
+		
+		# it returns a 404 status
+		self.assertEqual(response.status, 404)
+
 	def test_destroy(self):
-		self.fail("Write test")
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		oldTime = timezone.now()
+		measurement = Measurement()
+		measurement.datapoint = datapoint
+		measurement.valueFloat = 20
+		measurement.time = oldTime
+		measurement.save()
+
+		oldCount = Measurement.objects.count()
+
+		# when a JSON request with Method DELETE is sent to the Measurement resource
+		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":measurement.id})
+		response = self.client.delete(url)
+
+		# it deletes the entry with the matching id
+		self.assertEqual(oldCount-1,Measurement.objects.count())
+		self.assertRaises(ObjectDoesNotExist, lambda: Measurement.objects.get(pk=measurement.id))
+
+		# it returns a 200 status
+		self.assertEqual(response.status, 200)
 
 	def test_destroy_unknown(self):
-		self.fail("Write test")
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
 
+		# when a request with Method DELETE is sent to the Measurement resource
+		# with a nonexistant id
+		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":0})
+		response = self.client.delete(url)
 
+		# it returns a 404 status
+		self.assertEqual(response.status, 404)
+
+"""
 	def test_read(self):
 		self.fail("Write test")
 
