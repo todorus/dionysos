@@ -363,6 +363,13 @@ class MeasurementTest(TestCase):
 		datapoint.datatype = DataPoint.TYPE_FLOAT
 		datapoint.save()
 
+		oldTime = timezone.now()
+		measurement = Measurement()
+		measurement.datapoint = datapoint
+		measurement.valueFloat = 20
+		measurement.time = oldTime
+		measurement.save()
+
 		# when a request with Method DELETE is sent to the Measurement resource
 		# with a nonexistant id
 		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":0})
@@ -371,11 +378,52 @@ class MeasurementTest(TestCase):
 		# it returns a 404 status
 		self.assertEqual(response.status, 404)
 
-"""
-	def test_read(self):
-		self.fail("Write test")
 
+	def test_read(self):
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		oldTime = timezone.now()
+		measurement = Measurement()
+		measurement.datapoint = datapoint
+		measurement.valueFloat = 20
+		measurement.time = oldTime
+		measurement.save()
+
+		# when a JSON request with Method GET is sent to the Measurement resource
+		# it finds the entry with the matching id
+		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":measurement.id})
+		response = self.client.get(url,content_type="application/json")
+		
+		# it returns a 200 status
+		self.assertEqual(response.status, 200)
+
+		# and returns the found entry as JSON in the body
+		self.assertEqual(json.loads(response.body),measurement.to_dict())
 
 	def test_read_unknown(self):
-		self.fail("Write test")
-"""	
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		oldTime = timezone.now()
+		measurement = Measurement()
+		measurement.datapoint = datapoint
+		measurement.valueFloat = 20
+		measurement.time = oldTime
+		measurement.save()
+
+		# when a JSON request with Method GET is sent to the DataPoint resource
+		# it finds the entry with the matching id
+		url = reverse("measurement", kwargs={"datapoint_id":datapoint.id, "measurement_id":0})
+		response = self.client.get(url,content_type="application/json")
+		
+		# it returns a 200 status
+		self.assertEqual(response.status, 404)
