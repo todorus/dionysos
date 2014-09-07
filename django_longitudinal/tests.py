@@ -483,3 +483,32 @@ class MeasurementTest(TestCase):
 		self.assertEqual(json.loads(response.body), measurements)
 		# it returns a 200 status
 		self.assertEqual(response.status, 200)
+
+class ObservableTest(TestCase):
+	def setUp(self):
+		self.client = Client()
+
+	def test_create_correct(self):
+		self.fail('Finish the test!')
+
+	def test_create_incorrect(self):
+		self.fail('Finish the test!')
+
+	def test_update(self):
+		self.fail('Finish the test!')
+
+	def test_destroy(self):
+		self.fail('Finish the test!')
+
+	def test_add_datapoints(self):
+		self.fail('Finish the test!')
+
+	def test_remove_datapoints(self):
+		self.fail('Finish the test!')
+
+	def test_read(self):
+		self.fail('Finish the test!')
+
+	def test_index(self):
+		self.fail('Finish the test!')
+
