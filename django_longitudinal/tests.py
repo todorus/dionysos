@@ -224,10 +224,10 @@ class DataPointTest(TestCase):
 
 		# when a POST request is sent to the assign endpoint, with valid data
 		url = reverse("assign_observable", kwargs={"observable_id": observable.id,"datapoint_id":datapoint.id})
-		response = self.client.post(url, json.dumps(data),content_type="application/json")
+		response = self.client.put(url, None,content_type="application/json")
 
 		# it assigns the Datapoint to the Observable
-		updated = Datapoint.objects.get(pid=datapoint.id)
+		updated = DataPoint.objects.get(pk=datapoint.id)
 		self.assertEqual(observable.id, updated.observable.id)
 
 		# and returns a 200 status
@@ -235,6 +235,44 @@ class DataPointTest(TestCase):
 
 		# and returns the updated entry as JSON in the body
 		self.assertEqual(json.loads(response.body), updated.to_dict())
+
+def test_assign_to_observable_unknown_observable(self):
+		observable = Observable()
+		observable.label = "My first observable"
+		observable.save()
+
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		# when a POST request is sent to the assign endpoint, with an unknown observable
+		url = reverse("assign_observable", kwargs={"observable_id": 0,"datapoint_id":datapoint.id})
+		response = self.client.put(url, None,content_type="application/json")
+
+		# it returns a 404 status
+		self.assertEqual(response.status, 404)
+
+def test_assign_to_observable_unknown_datapoint(self):
+		observable = Observable()
+		observable.label = "My first observable"
+		observable.save()
+
+		datapoint = DataPoint()
+		datapoint.label = "Inside temperature"
+		datapoint.quantity = "temperature"
+		datapoint.unit = "°C"
+		datapoint.datatype = DataPoint.TYPE_FLOAT
+		datapoint.save()
+
+		# when a POST request is sent to the assign endpoint, with an unknown observable
+		url = reverse("assign_observable", kwargs={"observable_id": observable.id,"datapoint_id":0})
+		response = self.client.put(url, None,content_type="application/json")
+
+		# it returns a 404 status
+		self.assertEqual(response.status, 404)
 
 class MeasurementTest(TestCase):
 

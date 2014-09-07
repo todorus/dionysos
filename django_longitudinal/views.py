@@ -158,6 +158,21 @@ def measurements(request, datapoint_id):
 
 	return response
 
+def assignObservable(request, datapoint_id, observable_id):
+	response = HttpResponse()
+	response.status = 400
+
+	try:
+		if request.method == PUT:
+			datapoint = DataPoint.objects.get(pk=datapoint_id)
+			datapoint.observable_id = observable_id
+			datapoint.save()
+			response.body = DataPoint.objects.get(pk=datapoint_id).to_json()
+			response.status = 200
+	except ObjectDoesNotExist:
+			response.status = 404
+
+	return response
 
 def measurement(request, datapoint_id, measurement_id):
 	response = HttpResponse()
