@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django_longitudinal.models import DataPoint
 from django_longitudinal.models import Measurement
+from django_longitudinal.models import Observable
 import json
 from django.core import serializers
 from django.core.exceptions import ValidationError
@@ -18,6 +19,55 @@ DELETE = 'DELETE'
 
 def home(request):
 	return HttpResponse("<html><head><title>Variables</title></head><body></body></html>")
+
+def observables(request):
+	response = HttpResponse()
+	response.status = 400
+
+	if request.method == GET:
+		entries = Observable.objects.all()
+		dicts = []
+		for entry in entries:
+			dicts.append(entry.to_dict())
+		response.body = json.dumps(dicts)
+		response.status = 200
+	elif request.method == POST:
+		data = json.loads(getBody(request))
+
+		try:
+			entry = Observable(**data)
+			entry.full_clean()
+			entry.save()
+
+			response.body = entry.to_json()
+			response.status = 201
+		except ValidationError:
+			response.status = 400
+		except IntegrityError:
+			response.status = 400
+
+	return response
+
+def observable(request, id):
+	response = HttpResponse()
+	response.status = 400
+
+	try:
+		if request.method == GET:
+			response.body = Observable.objects.get(pk=id).to_json()
+			response.status = 200
+		elif request.method == PUT:
+			data = json.loads(getBody(request))
+			Observable.objects.filter(pk=id).update(**data)
+			response.body = Observable.objects.get(pk=id).to_json()
+			response.status = 200
+		elif request.method == DELETE:
+			Observable.objects.get(pk=id).delete()
+			response.status = 200
+	except ObjectDoesNotExist:
+			response.status = 404
+
+	return response
 
 def datapoints(request):
 	response = HttpResponse()
@@ -108,6 +158,21 @@ def measurements(request, datapoint_id):
 
 	return response
 
+def assignObservable(request, datapoint_id, observable_id):
+	response = HttpResponse()
+	response.status = 400
+
+	try:
+		if request.method == PUT:
+			datapoint = DataPoint.objects.get(pk=datapoint_id)
+			datapoint.observable_id = observable_id
+			datapoint.save()
+			response.body = DataPoint.objects.get(pk=datapoint_id).to_json()
+			response.status = 200
+	except ObjectDoesNotExist:
+			response.status = 404
+
+	return response
 
 def measurement(request, datapoint_id, measurement_id):
 	response = HttpResponse()

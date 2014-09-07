@@ -5,6 +5,18 @@ from django.core.exceptions import ValidationError
 
 # Create your models here.
 
+class Observable(models.Model):
+	label = models.CharField(max_length=200)
+
+	def to_dict(self):
+		return {
+			"id": self.id,
+			"label":self.label,
+		}
+
+	def to_json(self):
+		return json.dumps(self.to_dict())
+
 class DataPoint(models.Model):
 	TYPE_STRING = 1
 	TYPE_INTEGER = 2
@@ -21,6 +33,7 @@ class DataPoint(models.Model):
 	quantity = models.CharField(max_length=200)
 	unit = models.CharField(max_length=50)
 	datatype = models.PositiveSmallIntegerField(choices=TYPE_CHOICES)
+	observable = models.ForeignKey(Observable, null=True, blank=True)
 
 	def to_dict(self):
 		return {
