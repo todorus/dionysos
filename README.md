@@ -14,6 +14,7 @@ A RESTfull JSON API which can be used to create endpoints for measurements to be
 
 * 0.1.1 DataPoints API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#datapoints)
 * 0.2   Measurements API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#measurements)
+* 0.3   Observables API [doc](https://github.com/todorus/dionysos/wiki/API-documentation#observables)
 * Images
 
 Admin client
