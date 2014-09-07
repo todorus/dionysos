@@ -7,4 +7,6 @@ urlpatterns = [
   url(r'^datapoints/(?P<datapoint_id>[0-9]+)/measurements', 'django_longitudinal.views.measurements',name="measurements"),
   url(r'^datapoints/(?P<id>[0-9]+)', 'django_longitudinal.views.datapoint',name="datapoint"),
   url(r'^datapoints', 'django_longitudinal.views.datapoints',name="datapoints"),
+  url(r'^observables/(?P<id>[0-9]+)', 'django_longitudinal.views.observable',name="observable"),
+  url(r'^observables', 'django_longitudinal.views.observables',name="observables"),
 ]
