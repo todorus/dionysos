@@ -17,9 +17,6 @@ POST = 'POST'
 PUT = 'PUT'
 DELETE = 'DELETE'
 
-def home(request):
-	return HttpResponse("<html><head><title>Variables</title></head><body></body></html>")
-
 def observables(request):
 	response = HttpResponse()
 	response.status = 400

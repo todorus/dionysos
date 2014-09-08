@@ -7,7 +7,6 @@ from django.test.client import Client
 import json
 from django.core.exceptions import ObjectDoesNotExist
 
-from django_longitudinal.views import home
 from django_longitudinal.models import DataPoint
 from django_longitudinal.models import Measurement
 from django_longitudinal.models import Observable
